@@ -34,11 +34,5 @@ namespace ShadowRunner.RunnerConsole
 			Console.WriteLine("Run completed");
 			Console.WriteLine();
 		}
-
-		public static void WriteUnexpectedRunnerError()
-		{
-			Console.WriteLine("An unexpected error occurred while running the target application.");
-			Console.WriteLine();
-		}
 	}
 }

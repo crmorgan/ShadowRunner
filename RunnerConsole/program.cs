@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace ShadowRunner.RunnerConsole
 {
@@ -8,11 +9,18 @@ namespace ShadowRunner.RunnerConsole
 	/// </summary>
 	class Program
 	{
+		private static string cachePath;
+
+		static Program()
+		{
+			SetCachePath();
+			AppDomain.CurrentDomain.ProcessExit += ProcessExitHandler;
+		}
+
 		[LoaderOptimization(LoaderOptimization.MultiDomainHost)]
-		[STAThread]
 		public static void Main( string[] args )
 		{
-			args = new[] { @"D:\SVNProjects\Inspirato\tools\ShadowRunner\TestConsole\bin\TestConsole.exe", "DoSomething" };
+			//args = new[] { @"C:\Repos\ShadowRunner\TestConsole\bin\TestConsole.exe", "DoSomething" };
 
 			ConsoleWriter.WriteBanner();
 			
@@ -29,7 +37,7 @@ namespace ShadowRunner.RunnerConsole
 		private static void RunApplication( string[] args )
 		{
 			var appPath = ArgumentReader.GetApplicationPath( args );
-			var appDomain = AppDomainFactory.Create( appPath );
+			var appDomain = AppDomainFactory.Create(appPath, cachePath);
 			var runner = new AppDomainRunner( appDomain );
 
 			ConsoleWriter.WriteRunStarting( appDomain );
@@ -37,6 +45,26 @@ namespace ShadowRunner.RunnerConsole
 			runner.Run( appPath, ArgumentReader.GetApplicationArgs( args ) );
 
 			ConsoleWriter.WriteRunComplete();
+		}
+
+		private static void ProcessExitHandler( object sender, EventArgs e )
+		{
+			if ( !string.IsNullOrEmpty(cachePath) && Directory.Exists(cachePath) )
+			{
+				Directory.Delete(cachePath, true);
+			}
+		}
+
+		private static void SetCachePath()
+		{
+			var currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
+			if ( currentPath == null )
+			{
+				throw new DirectoryNotFoundException();
+			}
+
+			cachePath = Path.Combine(currentPath, "__" + Guid.NewGuid());
 		}
 	}
 }

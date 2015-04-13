@@ -9,17 +9,17 @@ namespace ShadowRunner.RunnerConsole
 	internal class AppDomainRunner
 	{
 		private readonly AppDomain _appDomain;
-		private static string _tempPath;
+		private static DirectoryInfo cacheDirectory;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AppDomainRunner"/> class that will run
 		/// the console application executable in the provided <see cref="AppDomain"/>.
 		/// </summary>
 		/// <param name="appDomain">The application domain containing the executable file.</param>
-		public AppDomainRunner(AppDomain appDomain)
+		public AppDomainRunner( AppDomain appDomain )
 		{
 			_appDomain = appDomain;
-			_tempPath = _appDomain.SetupInformation.CachePath;
+			cacheDirectory = new DirectoryInfo( _appDomain.SetupInformation.CachePath );
 		}
 
 		/// <summary>
@@ -30,36 +30,25 @@ namespace ShadowRunner.RunnerConsole
 		/// <exception cref="System.ArgumentException">If the path or file does not exist.</exception>
 		public void Run( string applicationPath, string[] args )
 		{
-			if ( !File.Exists(applicationPath) )
+			if ( !File.Exists( applicationPath ) )
 			{
-				throw new ArgumentException("Could not find target application at " + applicationPath + ".", "applicationPath");
+				throw new ArgumentException( "Could not find target application at " + applicationPath + ".", "applicationPath" );
 			}
 
-			try
-			{
-				_appDomain.ExecuteAssembly( applicationPath, args );
-			}
-			catch ( Exception )
-			{
-				AppDomain.Unload(_appDomain);
-				AppDomain.CurrentDomain.DomainUnload += DomainUnloadedEventHandler;
-				ConsoleWriter.WriteUnexpectedRunnerError();
-				throw;
-			}
-		}
+			var appName = Path.GetFileName( applicationPath );
 
-		private void DomainUnloadedEventHandler( object sender, EventArgs e )
-		{
-			DeleteShadowCopyDirectory();
-		}
-
-
-		private static void DeleteShadowCopyDirectory()
-		{
-			if ( Directory.Exists( _tempPath ) )
+			if ( string.IsNullOrEmpty( appName ) )
 			{
-				Directory.Delete( _tempPath, true );
+				throw new ArgumentException("Path does not include a file name", applicationPath);
 			}
+
+			var appDirectory = Path.GetDirectoryName( applicationPath );
+
+			FileSystem.CopyDirectory( new DirectoryInfo( appDirectory ), cacheDirectory );
+
+			_appDomain.ExecuteAssembly( Path.Combine( cacheDirectory.FullName, appName ), args );
+
+			AppDomain.Unload( _appDomain );
 		}
 	}
 }

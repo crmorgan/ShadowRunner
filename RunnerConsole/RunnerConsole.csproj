@@ -51,6 +51,7 @@
     <Compile Include="AppDomainRunner.cs" />
     <Compile Include="ArgumentReader.cs" />
     <Compile Include="ConsoleWriter.cs" />
+    <Compile Include="FileSystem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

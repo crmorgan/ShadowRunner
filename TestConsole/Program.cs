@@ -4,18 +4,19 @@ using System.Reflection;
 using System.Threading;
 using TestConsole.Logging;
 
+
 namespace TestConsole
 {
 	/// <summary>
-	/// http://stackoverflow.com/questions/1091223/log4net-across-appdomains
+	/// Simple console app that writes to the console using log4net.
 	/// </summary>
 	class Program
 	{
-		private static readonly ILogger Logger;
+		private static readonly ILogger logger;
 
 		static Program()
 		{
-			Logger = new LogManager().GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+			logger = new LogManager().GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 		}
 
 		static void Main( string[] args )
@@ -23,7 +24,6 @@ namespace TestConsole
 			try
 			{
 				LogHeader(args);
-
 				DoSomething();
 			}
 			catch ( Exception e )
@@ -38,7 +38,7 @@ namespace TestConsole
 
 		private static void DoSomething()
 		{
-			Logger.Info( "Doing some work..." );
+			logger.Info( "Doing some work..." );
 			var sleepTime = int.Parse( ConfigurationManager.AppSettings["TaskDurationInSeconds"] );
 
 			Thread.Sleep( sleepTime * 1000 );
@@ -48,18 +48,18 @@ namespace TestConsole
 		{
 			var errorMessage = string.Format("An unhandled exception was thrown: {0}", e.Message);
 
-			Logger.Error(errorMessage, e);
+			logger.Error(errorMessage, e);
 		}
 
 		private static void LogHeader( string[] args )
 		{
-			Logger.Debug("--- Begin Console Run");
-			Logger.Debug("Commandline arguments: " + string.Join(",", args));
+			logger.Debug("Begin Task");
+			logger.Debug("Commandline arguments: " + string.Join(",", args));
 		}
 
 		private static void LogFooter()
 		{
-			Logger.Debug("--- End Console Run");
+			logger.Debug("End Task");
 		}
 	}
 }
