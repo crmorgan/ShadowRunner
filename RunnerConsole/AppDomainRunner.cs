@@ -46,9 +46,14 @@ namespace ShadowRunner.RunnerConsole
 
 			FileSystem.CopyDirectory( new DirectoryInfo( appDirectory ), cacheDirectory );
 
-			_appDomain.ExecuteAssembly( Path.Combine( cacheDirectory.FullName, appName ), args );
-
-			AppDomain.Unload( _appDomain );
+			try
+			{
+				_appDomain.ExecuteAssembly(Path.Combine(cacheDirectory.FullName, appName), args);
+			}
+			finally
+			{
+				AppDomain.Unload(_appDomain);
+			}
 		}
 	}
 }

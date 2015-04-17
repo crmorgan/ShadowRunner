@@ -3,10 +3,6 @@ using System.IO;
 
 namespace ShadowRunner.RunnerConsole
 {
-	/// <summary>
-	/// Runs a console applications in a shadow copy mode allowing the target application to be updatable when running.
-	/// http://www.codeproject.com/Articles/29961/Shadow-Copying-of-Applications
-	/// </summary>
 	class Program
 	{
 		private static string cachePath;
@@ -42,7 +38,14 @@ namespace ShadowRunner.RunnerConsole
 
 			ConsoleWriter.WriteRunStarting( appDomain );
 
-			runner.Run( appPath, ArgumentReader.GetApplicationArgs( args ) );
+			try
+			{
+				runner.Run( appPath, ArgumentReader.GetApplicationArgs( args ) );
+			}
+			catch ( Exception e)
+			{
+				Console.WriteLine( "An error occured in the target application: {0}", e.Message	 );
+			}
 
 			ConsoleWriter.WriteRunComplete();
 		}
@@ -51,6 +54,7 @@ namespace ShadowRunner.RunnerConsole
 		{
 			if ( !string.IsNullOrEmpty(cachePath) && Directory.Exists(cachePath) )
 			{
+				Console.WriteLine("Deleting cache directory");
 				Directory.Delete(cachePath, true);
 			}
 		}

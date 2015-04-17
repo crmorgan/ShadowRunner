@@ -39,7 +39,8 @@ namespace ShadowRunner.RunnerConsole
 
 		public static void WriteRunComplete()
 		{
-			Console.WriteLine("Run completed");
+			Console.WriteLine();
+			Console.WriteLine("Shadow Run completed");
 			Console.WriteLine();
 		}
 	}
